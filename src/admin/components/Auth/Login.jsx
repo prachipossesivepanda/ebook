@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const Login = () => {
+  const [searchParams] = useSearchParams();
+  const roleFromUrl = searchParams.get('role') || 'super_admin';
+  const isSubAdmin = roleFromUrl === 'sub_admin';
+  
   const [formData, setFormData] = useState({
-    email: 'admin@gmail.com',
+    email: isSubAdmin ? 'subadmin@gmail.com' : 'admin@gmail.com',
     password: '',
-    role: 'super_admin'
+    role: isSubAdmin ? 'sub_admin' : 'super_admin'
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();

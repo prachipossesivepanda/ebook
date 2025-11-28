@@ -7,7 +7,7 @@ import Dashboard from './admin/pages/Dashboard';
 import Vendors from './admin/pages/Vendors';
 import VendorOnboarding from './admin/pages/VendorOnboarding';
 import KycVerification from './admin/pages/KycVerification';
-import Orders from './admin/pages/Orders';
+import AdminOrders from './admin/pages/Orders';
 import Analytics from './admin/pages/Analytics';
 import Catalog from './admin/pages/Catalog';
 import ContentApproval from './admin/pages/ContentApproval';
@@ -16,6 +16,20 @@ import Subscription from './admin/pages/Subscription';
 import SubAdmins from './admin/pages/SubAdmins';
 import Settings from './admin/pages/Settings';
 import Unauthorized from './admin/pages/Unauthorized';
+
+// User components
+import UserLayout from './user/common/UserLayout';
+import UserProtectedRoute from './user/Services/UserProtectedRoute';
+import Home from './user/pages/Home';
+import BrowseBooks from './user/pages/BrowseBooks';
+import BookDetails from './user/pages/BookDetails';
+import Cart from './user/pages/Cart';
+import Orders from './user/pages/Orders';
+import Profile from './user/pages/Profile';
+import UserLogin from './user/components/Auth/UserLogin';
+import UserRegister from './user/components/Auth/UserRegister';
+import RoleSelection from './user/components/RoleSelection';
+
 import './App.css';
 
 function App() {
@@ -77,7 +91,7 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['super_admin', 'sub_admin']}>
               <Layout>
-                <Orders />
+                <AdminOrders />
               </Layout>
             </ProtectedRoute>
           }
@@ -160,8 +174,67 @@ function App() {
           }
         />
 
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to="/admin/login" replace />} />
+        {/* User Routes */}
+        {/* Public User Routes */}
+        <Route path="/role-selection" element={<RoleSelection />} />
+        <Route path="/login" element={<UserLogin />} />
+        <Route path="/register" element={<UserRegister />} />
+
+        {/* Protected User Routes */}
+        <Route
+          path="/"
+          element={
+            <UserLayout>
+              <Home />
+            </UserLayout>
+          }
+        />
+        <Route
+          path="/books"
+          element={
+            <UserLayout>
+              <BrowseBooks />
+            </UserLayout>
+          }
+        />
+        <Route
+          path="/books/:id"
+          element={
+            <UserLayout>
+              <BookDetails />
+            </UserLayout>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <UserLayout>
+              <Cart />
+            </UserLayout>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <UserProtectedRoute>
+              <UserLayout>
+                <Orders />
+              </UserLayout>
+            </UserProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <UserProtectedRoute>
+              <UserLayout>
+                <Profile />
+              </UserLayout>
+            </UserProtectedRoute>
+          }
+        />
+
+        {/* Default redirects */}
         <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
       </Routes>
     </Router>

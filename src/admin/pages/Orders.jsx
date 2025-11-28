@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useRoleContext } from '../hooks/useRoleContext';
 
 const Orders = () => {
+  const { isVendorTeam, vendorName } = useRoleContext();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
@@ -12,9 +14,27 @@ const Orders = () => {
     { id: 'ORD-005', vendor: 'Novel Corner', customer: 'Charlie Wilson', items: 2, amount: '$67.50', status: 'Cancelled', date: '2024-01-19', payment: 'Refunded' },
   ];
 
-  const filteredOrders = orders.filter(order => {
+  const scopedOrders = useMemo(() => {
+    if (!isVendorTeam || !vendorName) return orders;
+    const vendorOrders = orders.filter((order) => order.vendor === vendorName);
+    return vendorOrders.length ? vendorOrders : orders;
+  }, [isVendorTeam, vendorName]);
+
+  const statusSummary = useMemo(() => {
+    return scopedOrders.reduce(
+      (acc, order) => {
+        acc.total += 1;
+        const key = order.status.toLowerCase();
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      },
+      { total: 0 }
+    );
+  }, [scopedOrders]);
+
+  const filteredOrders = scopedOrders.filter(order => {
     const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.vendor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (!isVendorTeam && order.vendor.toLowerCase().includes(searchTerm.toLowerCase())) ||
                          order.customer.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || order.status.toLowerCase() === filterStatus.toLowerCase();
     return matchesSearch && matchesStatus;
@@ -35,15 +55,19 @@ const Orders = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Order Management</h2>
-          <p className="text-gray-600">View and manage all orders</p>
+          <h2 className="text-2xl font-bold text-gray-800">{isVendorTeam ? 'University Orders' : 'Order Management'}</h2>
+          <p className="text-gray-600">
+            {isVendorTeam ? 'Monitor incoming orders, fulfillment, and payouts' : 'View and manage all platform orders'}
+          </p>
         </div>
         <div className="flex gap-2">
-          <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
-            Export
-          </button>
+          {!isVendorTeam && (
+            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium">
+              Export
+            </button>
+          )}
           <button className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 text-sm font-medium">
-            Create Order
+            {isVendorTeam ? 'Create Manual Order' : 'Create Order'}
           </button>
         </div>
       </div>
@@ -52,19 +76,19 @@ const Orders = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <p className="text-sm text-gray-600 mb-1">Total Orders</p>
-          <p className="text-2xl font-bold text-gray-800">1,234</p>
+          <p className="text-2xl font-bold text-gray-800">{statusSummary.total}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <p className="text-sm text-gray-600 mb-1">Pending</p>
-          <p className="text-2xl font-bold text-yellow-600">23</p>
+          <p className="text-2xl font-bold text-yellow-600">{statusSummary.pending || 0}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <p className="text-sm text-gray-600 mb-1">Processing</p>
-          <p className="text-2xl font-bold text-blue-600">45</p>
+          <p className="text-2xl font-bold text-blue-600">{statusSummary.processing || 0}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <p className="text-sm text-gray-600 mb-1">Delivered</p>
-          <p className="text-2xl font-bold text-green-600">1,166</p>
+          <p className="text-2xl font-bold text-green-600">{statusSummary.delivered || 0}</p>
         </div>
       </div>
 
@@ -74,7 +98,7 @@ const Orders = () => {
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Search by order ID, vendor, or customer..."
+              placeholder={isVendorTeam ? 'Search by order ID or customer...' : 'Search by order ID, vendor, or customer...'}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
@@ -93,7 +117,47 @@ const Orders = () => {
             <option value="cancelled">Cancelled</option>
           </select>
         </div>
+        {isVendorTeam && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            {['all', 'pending', 'processing', 'shipped', 'delivered'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setFilterStatus(status)}
+                className={`px-3 py-1 rounded-full text-xs font-semibold border ${
+                  filterStatus === status ? 'bg-slate-900 text-white border-slate-900' : 'text-slate-600 border-slate-200 hover:border-slate-400'
+                }`}
+              >
+                {status === 'all' ? 'All orders' : status.charAt(0).toUpperCase() + status.slice(1)}
+                {status !== 'all' && (
+                  <span className="ml-1 text-[10px] text-slate-400">
+                    {(statusSummary[status] || 0).toString()}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
+
+      {isVendorTeam && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Ready to ship</p>
+            <p className="text-2xl font-semibold text-gray-900 mt-1">{statusSummary.processing || 0}</p>
+            <p className="text-xs text-gray-400 mt-1">Orders awaiting fulfillment</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">In transit</p>
+            <p className="text-2xl font-semibold text-gray-900 mt-1">{statusSummary.shipped || 0}</p>
+            <p className="text-xs text-gray-400 mt-1">Packages currently with couriers</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Issues requiring action</p>
+            <p className="text-2xl font-semibold text-red-600 mt-1">{statusSummary.cancelled || 0}</p>
+            <p className="text-xs text-gray-400 mt-1">Cancelled/refund cases</p>
+          </div>
+        </div>
+      )}
 
       {/* Orders Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -102,7 +166,9 @@ const Orders = () => {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+                {!isVendorTeam && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+                )}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
@@ -117,9 +183,11 @@ const Orders = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{order.id}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{order.vendor}</div>
-                  </td>
+                  {!isVendorTeam && (
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{order.vendor}</div>
+                    </td>
+                  )}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{order.customer}</div>
                   </td>

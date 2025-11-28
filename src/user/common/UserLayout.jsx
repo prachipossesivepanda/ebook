@@ -55,6 +55,14 @@ const UserLayout = ({ children }) => {
               >
                 My Orders
               </Link>
+              <Link
+                to="/my-ebooks"
+                className={`text-sm font-medium transition-colors ${
+                  location.pathname === '/my-ebooks' ? 'text-slate-900' : 'text-gray-600 hover:text-slate-900'
+                }`}
+              >
+                My Ebooks
+              </Link>
             </nav>
 
             {/* Right Side Actions */}
@@ -131,7 +139,7 @@ const UserLayout = ({ children }) => {
                 <span className="text-lg font-semibold text-gray-900">E-Book Store</span>
               </div>
               <p className="text-sm text-gray-600">
-                Your one-stop destination for digital books from multiple vendors.
+                Your one-stop destination for digital books from multiple universities.
               </p>
             </div>
             <div>
@@ -139,6 +147,7 @@ const UserLayout = ({ children }) => {
               <ul className="space-y-2 text-sm text-gray-600">
                 <li><Link to="/books" className="hover:text-slate-900 transition-colors">Browse Books</Link></li>
                 <li><Link to="/orders" className="hover:text-slate-900 transition-colors">My Orders</Link></li>
+                <li><Link to="/my-ebooks" className="hover:text-slate-900 transition-colors">My Ebooks</Link></li>
                 <li><Link to="/profile" className="hover:text-slate-900 transition-colors">My Profile</Link></li>
               </ul>
             </div>

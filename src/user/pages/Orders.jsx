@@ -8,8 +8,27 @@ const Orders = () => {
       status: 'Delivered',
       total: 45.99,
       items: [
-        { title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', quantity: 1, price: 12.99, image: '📚' },
-        { title: '1984', author: 'George Orwell', quantity: 2, price: 11.99, image: '📕' },
+        { 
+          id: 1,
+          title: 'The Great Gatsby', 
+          author: 'F. Scott Fitzgerald', 
+          quantity: 1, 
+          price: 12.99, 
+          image: '📚',
+          productType: 'ebook',
+          vendor: 'BookStore Pro',
+        },
+        { 
+          id: 3,
+          title: '1984', 
+          author: 'George Orwell', 
+          quantity: 2, 
+          price: 11.99, 
+          image: '📕',
+          productType: 'physical',
+          vendor: 'ReadMore Books',
+          trackingNumber: 'TRK-123456',
+        },
       ]
     },
     {
@@ -18,8 +37,26 @@ const Orders = () => {
       status: 'Processing',
       total: 89.50,
       items: [
-        { title: 'To Kill a Mockingbird', author: 'Harper Lee', quantity: 1, price: 14.99, image: '📖' },
-        { title: 'Pride and Prejudice', author: 'Jane Austen', quantity: 3, price: 13.99, image: '📗' },
+        { 
+          id: 2,
+          title: 'To Kill a Mockingbird', 
+          author: 'Harper Lee', 
+          quantity: 1, 
+          price: 14.99, 
+          image: '📖',
+          productType: 'ebook',
+          vendor: 'Literary Hub',
+        },
+        { 
+          id: 4,
+          title: 'Pride and Prejudice', 
+          author: 'Jane Austen', 
+          quantity: 3, 
+          price: 13.99, 
+          image: '📗',
+          productType: 'physical',
+          vendor: 'Book World',
+        },
       ]
     },
     {
@@ -28,7 +65,16 @@ const Orders = () => {
       status: 'Shipped',
       total: 32.00,
       items: [
-        { title: 'Sapiens: A Brief History', author: 'Yuval Noah Harari', quantity: 1, price: 16.99, image: '📘' },
+        { 
+          id: 5,
+          title: 'Sapiens: A Brief History', 
+          author: 'Yuval Noah Harari', 
+          quantity: 1, 
+          price: 16.99, 
+          image: '📘',
+          productType: 'ebook',
+          vendor: 'BookStore Pro',
+        },
       ]
     },
   ];
@@ -84,17 +130,37 @@ const Orders = () => {
 
               <div className="border-t border-gray-200 pt-4 space-y-3">
                 {order.items.map((item, index) => (
-                  <div key={index} className="flex items-center gap-4">
+                  <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
                     <div className="w-16 h-20 bg-gray-100 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
                       {item.image}
                     </div>
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">{item.title}</p>
                       <p className="text-sm text-gray-600">{item.author}</p>
-                      <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-xs text-gray-500">University: {item.vendor}</p>
+                        <span className={`text-xs px-2 py-0.5 rounded ${
+                          item.productType === 'ebook' 
+                            ? 'bg-blue-100 text-blue-700' 
+                            : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {item.productType === 'ebook' ? '📱 Ebook' : '📦 Physical'}
+                        </span>
+                      </div>
+                      {item.productType === 'physical' && item.trackingNumber && (
+                        <p className="text-xs text-gray-500 mt-1">Tracking: {item.trackingNumber}</p>
+                      )}
                     </div>
                     <div className="text-right">
                       <p className="font-medium text-gray-900">${(item.price * item.quantity).toFixed(2)}</p>
+                      {item.productType === 'ebook' && (order.status === 'Delivered' || order.status === 'Processing') && (
+                        <Link
+                          to={`/reader/${item.id}`}
+                          className="mt-2 inline-block px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
+                        >
+                          Read Now
+                        </Link>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -104,10 +170,13 @@ const Orders = () => {
                 <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-slate-900 transition-colors">
                   View Details
                 </button>
-                {order.status === 'Delivered' && (
-                  <button className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-                    Download
-                  </button>
+                {order.items.some(item => item.productType === 'ebook') && (order.status === 'Delivered' || order.status === 'Processing') && (
+                  <Link
+                    to="/my-ebooks"
+                    className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                  >
+                    Access Ebooks
+                  </Link>
                 )}
                 {order.status === 'Delivered' && (
                   <button className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">

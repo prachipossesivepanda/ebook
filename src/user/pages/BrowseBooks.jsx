@@ -17,9 +17,12 @@ const BrowseBooks = () => {
       originalPrice: '$15.99',
       image: '📚',
       vendor: 'BookStore Pro',
+      vendorId: 'VND-001',
       rating: 4.8,
       reviews: 1245,
-      category: 'Fiction'
+      category: 'Fiction',
+      hasEbook: true,
+      hasPhysical: true,
     },
     {
       id: 2,
@@ -28,9 +31,12 @@ const BrowseBooks = () => {
       price: '$14.99',
       image: '📖',
       vendor: 'Literary Hub',
+      vendorId: 'VND-002',
       rating: 4.9,
       reviews: 2134,
-      category: 'Fiction'
+      category: 'Fiction',
+      hasEbook: true,
+      hasPhysical: true,
     },
     {
       id: 3,
@@ -39,9 +45,12 @@ const BrowseBooks = () => {
       price: '$11.99',
       image: '📕',
       vendor: 'ReadMore Books',
+      vendorId: 'VND-003',
       rating: 4.7,
       reviews: 1890,
-      category: 'Fiction'
+      category: 'Fiction',
+      hasEbook: true,
+      hasPhysical: false,
     },
     {
       id: 4,
@@ -50,9 +59,12 @@ const BrowseBooks = () => {
       price: '$13.99',
       image: '📗',
       vendor: 'Book World',
+      vendorId: 'VND-004',
       rating: 4.6,
       reviews: 1567,
-      category: 'Fiction'
+      category: 'Fiction',
+      hasEbook: true,
+      hasPhysical: true,
     },
     {
       id: 5,
@@ -61,9 +73,12 @@ const BrowseBooks = () => {
       price: '$16.99',
       image: '📘',
       vendor: 'BookStore Pro',
+      vendorId: 'VND-001',
       rating: 4.8,
       reviews: 2341,
-      category: 'Non-Fiction'
+      category: 'Non-Fiction',
+      hasEbook: true,
+      hasPhysical: true,
     },
     {
       id: 6,
@@ -72,9 +87,12 @@ const BrowseBooks = () => {
       price: '$15.99',
       image: '💻',
       vendor: 'ReadMore Books',
+      vendorId: 'VND-003',
       rating: 4.5,
       reviews: 987,
-      category: 'Technology'
+      category: 'Technology',
+      hasEbook: true,
+      hasPhysical: false,
     },
     {
       id: 7,
@@ -83,9 +101,12 @@ const BrowseBooks = () => {
       price: '$14.99',
       image: '🔬',
       vendor: 'Literary Hub',
+      vendorId: 'VND-002',
       rating: 4.7,
       reviews: 1789,
-      category: 'Science'
+      category: 'Science',
+      hasEbook: true,
+      hasPhysical: true,
     },
     {
       id: 8,
@@ -94,9 +115,12 @@ const BrowseBooks = () => {
       price: '$12.99',
       image: '📜',
       vendor: 'Book World',
+      vendorId: 'VND-004',
       rating: 4.9,
       reviews: 3124,
-      category: 'History'
+      category: 'History',
+      hasEbook: true,
+      hasPhysical: true,
     },
   ];
 
@@ -196,7 +220,18 @@ const BrowseBooks = () => {
                   )}
                 </div>
               </div>
-              <p className="text-xs text-gray-500">by {book.vendor}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs font-medium text-blue-600">University:</span>
+                  <span className="text-xs font-semibold text-blue-700">{book.vendor}</span>
+                </div>
+                {(book.hasEbook || book.hasPhysical) && (
+                  <div className="flex gap-1">
+                    {book.hasEbook && <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">📱 Ebook</span>}
+                    {book.hasPhysical && <span className="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded">📦 Physical</span>}
+                  </div>
+                )}
+              </div>
             </div>
           </Link>
         ))}

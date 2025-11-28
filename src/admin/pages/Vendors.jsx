@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useRoleContext } from '../hooks/useRoleContext';
 
 const Vendors = () => {
+  const { isOwnerTeam } = useRoleContext();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
@@ -11,6 +13,18 @@ const Vendors = () => {
     { id: 4, name: 'Novel Corner', email: 'support@novelcorner.com', phone: '+1 234-567-8903', status: 'Suspended', joinDate: '2024-01-10', totalOrders: 89, revenue: '$4,560' },
     { id: 5, name: 'Book World', email: 'info@bookworld.com', phone: '+1 234-567-8904', status: 'Active', joinDate: '2024-01-12', totalOrders: 312, revenue: '$18,750' },
   ];
+
+  const summary = useMemo(() => {
+    return vendors.reduce(
+      (acc, vendor) => {
+        acc.total += 1;
+        const key = vendor.status.toLowerCase();
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      },
+      { total: 0 }
+    );
+  }, [vendors]);
 
   const filteredVendors = vendors.filter(vendor => {
     const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -34,12 +48,41 @@ const Vendors = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Vendor Management</h2>
-          <p className="text-gray-600">Manage all vendors in the platform</p>
+          <h2 className="text-2xl font-bold text-gray-800">University Management</h2>
+          <p className="text-gray-600">
+            {isOwnerTeam ? 'Oversee university health, onboarding, and compliance' : 'Browse marketplace university partners'}
+          </p>
         </div>
-        <button className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium">
-          Add New Vendor
-        </button>
+        {isOwnerTeam && (
+          <div className="flex gap-2">
+            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+              Export List
+            </button>
+            <button className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium">
+              Start Onboarding
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* KPIs */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+          <p className="text-sm text-gray-500">Total Universities</p>
+          <p className="text-2xl font-semibold text-gray-900 mt-1">{summary.total}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+          <p className="text-sm text-gray-500">Active</p>
+          <p className="text-2xl font-semibold text-emerald-700 mt-1">{summary.active || 0}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+          <p className="text-sm text-gray-500">Pending onboarding</p>
+          <p className="text-2xl font-semibold text-amber-600 mt-1">{summary.pending || 0}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+          <p className="text-sm text-gray-500">Requires attention</p>
+          <p className="text-2xl font-semibold text-red-600 mt-1">{summary.suspended || 0}</p>
+        </div>
       </div>
 
       {/* Filters */}
@@ -66,6 +109,19 @@ const Vendors = () => {
             <option value="inactive">Inactive</option>
           </select>
         </div>
+        <div className="flex flex-wrap gap-2 mt-4">
+          {['all', 'active', 'pending', 'suspended', 'inactive'].map((status) => (
+            <button
+              key={status}
+              className={`px-3 py-1 rounded-full text-xs font-semibold border ${
+                filterStatus === status ? 'bg-slate-900 text-white border-slate-900' : 'text-slate-600 border-slate-200 hover:border-slate-400'
+              }`}
+              onClick={() => setFilterStatus(status)}
+            >
+              {status === 'all' ? 'All Universities' : status.charAt(0).toUpperCase() + status.slice(1)}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Vendors Table */}
@@ -74,7 +130,7 @@ const Vendors = () => {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">University</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orders</th>
@@ -123,7 +179,7 @@ const Vendors = () => {
       {/* Pagination */}
       <div className="flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-200 p-4">
         <div className="text-sm text-gray-700">
-          Showing <span className="font-medium">1</span> to <span className="font-medium">5</span> of <span className="font-medium">5</span> vendors
+          Showing <span className="font-medium">1</span> to <span className="font-medium">5</span> of <span className="font-medium">5</span> universities
         </div>
         <div className="flex gap-2">
           <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
@@ -134,6 +190,33 @@ const Vendors = () => {
           </button>
         </div>
       </div>
+
+      {isOwnerTeam && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Onboarding pipeline</p>
+            <ul className="mt-3 space-y-2 text-sm text-gray-600">
+              <li>• 4 applications awaiting review</li>
+              <li>• 2 vendors pending KYC</li>
+              <li>• Avg. activation time 3.2 days</li>
+            </ul>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Compliance alerts</p>
+            <ul className="mt-3 space-y-2 text-sm text-gray-600">
+              <li>• 1 vendor missing tax forms</li>
+              <li>• 2 SLA breaches detected</li>
+            </ul>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Growth opportunities</p>
+            <ul className="mt-3 space-y-2 text-sm text-gray-600">
+              <li>• 3 vendors eligible for Spotlight</li>
+              <li>• 5 flagged for upsell outreach</li>
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

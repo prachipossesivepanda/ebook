@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useRoleContext } from '../hooks/useRoleContext';
 
 const Catalog = () => {
+  const { isVendorTeam, vendorName } = useRoleContext();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -13,10 +15,15 @@ const Catalog = () => {
     { id: 5, title: 'Kids Stories', author: 'Story Teller', vendor: 'BookStore Pro', category: 'Children', price: '$15.99', stock: 200, status: 'Active', sales: 312 },
   ];
 
-  const filteredBooks = books.filter(book => {
+  const scopedBooks = useMemo(() => {
+    if (!isVendorTeam || !vendorName) return books;
+    return books.filter((book) => book.vendor === vendorName);
+  }, [isVendorTeam, vendorName]);
+
+  const filteredBooks = scopedBooks.filter(book => {
     const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         book.vendor.toLowerCase().includes(searchTerm.toLowerCase());
+                         (!isVendorTeam && book.vendor.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = filterCategory === 'all' || book.category.toLowerCase() === filterCategory.toLowerCase();
     const matchesStatus = filterStatus === 'all' || book.status.toLowerCase().replace(' ', '_') === filterStatus.toLowerCase();
     return matchesSearch && matchesCategory && matchesStatus;
@@ -24,17 +31,55 @@ const Catalog = () => {
 
   const categories = ['all', 'Fiction', 'Non-Fiction', 'Educational', 'Children'];
 
+  const catalogStats = useMemo(() => {
+    return scopedBooks.reduce(
+      (acc, book) => {
+        acc.total += 1;
+        if (book.status === 'Active') acc.active += 1;
+        if (book.stock === 0) acc.outOfStock += 1;
+        acc.totalStock += book.stock;
+        acc.totalSales += book.sales;
+        return acc;
+      },
+      { total: 0, active: 0, outOfStock: 0, totalStock: 0, totalSales: 0 }
+    );
+  }, [scopedBooks]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Catalog Management</h2>
-          <p className="text-gray-600">Manage all books in the catalog</p>
+          <h2 className="text-2xl font-bold text-gray-800">{isVendorTeam ? 'My Catalog' : 'Catalog Management'}</h2>
+          <p className="text-gray-600">
+            {isVendorTeam ? 'Manage your book inventory and listings' : 'Manage all books in the catalog'}
+          </p>
         </div>
         <button className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium">
           Add New Book
         </button>
       </div>
+
+      {/* Vendor Catalog Stats */}
+      {isVendorTeam && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Total Books</p>
+            <p className="text-2xl font-semibold text-gray-900 mt-1">{catalogStats.total}</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Active Listings</p>
+            <p className="text-2xl font-semibold text-emerald-700 mt-1">{catalogStats.active}</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Out of Stock</p>
+            <p className="text-2xl font-semibold text-red-600 mt-1">{catalogStats.outOfStock}</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Total Sales</p>
+            <p className="text-2xl font-semibold text-blue-600 mt-1">{catalogStats.totalSales}</p>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
@@ -42,7 +87,7 @@ const Catalog = () => {
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Search books by title, author, or vendor..."
+              placeholder={isVendorTeam ? 'Search books by title or author...' : 'Search books by title, author, or vendor...'}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
@@ -78,7 +123,9 @@ const Catalog = () => {
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-800 mb-1">{book.title}</h3>
                 <p className="text-sm text-gray-600">by {book.author}</p>
-                <p className="text-xs text-gray-500 mt-1">Vendor: {book.vendor}</p>
+                {!isVendorTeam && (
+                  <p className="text-xs text-gray-500 mt-1">Vendor: {book.vendor}</p>
+                )}
               </div>
               <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                 book.status === 'Active' ? 'bg-green-100 text-green-700' :

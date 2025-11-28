@@ -1,10 +1,18 @@
 import { useState } from 'react';
 import Sidebar from './sidebar';
 import { useLocation } from 'react-router-dom';
+import { getStoredSession, getRoleLabel } from '../utils/session';
 
-const Layout = ({ children }) => {
+const variantCopy = {
+  owner: 'Manage your platform efficiently',
+  vendor: 'Operate your university partnerships and teams',
+  subadmin: 'Execute assigned workflows',
+};
+
+const Layout = ({ children, variant = 'owner', subtitle }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
+  const session = getStoredSession();
 
   const getPageTitle = () => {
     const path = location.pathname.split('/').pop();
@@ -16,7 +24,11 @@ const Layout = ({ children }) => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+      <Sidebar
+        isOpen={sidebarOpen}
+        setIsOpen={setSidebarOpen}
+        variant={variant}
+      />
       <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
         {/* Header */}
         <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4 sticky top-0 z-20">
@@ -34,7 +46,9 @@ const Layout = ({ children }) => {
                 <h1 className="text-2xl font-semibold text-gray-900">
                   {getPageTitle()}
                 </h1>
-                <p className="text-xs text-gray-500 mt-0.5">Manage your platform efficiently</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {subtitle || variantCopy[variant] || variantCopy.owner}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -67,18 +81,18 @@ const Layout = ({ children }) => {
               <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-medium text-gray-900">
-                    {localStorage.getItem('userName') || 'Admin User'}
+                    {session?.user?.name || 'Admin User'}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {localStorage.getItem('userEmail') || localStorage.getItem('userName') + '@gmail.com'}
+                    {session?.user?.email || `${session?.user?.name || 'admin'}@example.com`}
                   </p>
-                  <p className="text-xs text-gray-400 capitalize">
-                    {localStorage.getItem('userRole')?.replace('_', ' ') || 'Super Admin'}
+                  <p className="text-xs text-gray-400">
+                    {getRoleLabel(session?.role)}
                   </p>
                 </div>
                 <div className="relative group cursor-pointer">
                   <div className="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center text-white font-semibold text-sm shadow-sm hover:bg-slate-800 transition-colors">
-                    {localStorage.getItem('userName')?.charAt(0).toUpperCase() || 'A'}
+                    {session?.user?.name?.charAt(0).toUpperCase() || 'A'}
                   </div>
                   {/* Online status indicator */}
                   <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>

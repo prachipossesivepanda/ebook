@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './admin/common/Layout';
+import OwnerLayout from './admin/common/OwnerLayout';
+import UniversityLayout from './admin/common/UniversityLayout';
+import SubadminLayout from './admin/common/SubadminLayout';
 import ProtectedRoute from './admin/Services/Protectedroutes';
 import Login from './admin/components/Auth/Login';
 import Otp from './admin/components/Auth/Otp';
@@ -25,12 +27,15 @@ import BrowseBooks from './user/pages/BrowseBooks';
 import BookDetails from './user/pages/BookDetails';
 import Cart from './user/pages/Cart';
 import Orders from './user/pages/Orders';
+import MyEbooks from './user/pages/MyEbooks';
 import Profile from './user/pages/Profile';
 import UserLogin from './user/components/Auth/UserLogin';
 import UserRegister from './user/components/Auth/UserRegister';
 import RoleSelection from './user/components/RoleSelection';
+import EbookReader from './user/components/EbookReader';
 
 import './App.css';
+import { ROLE_GROUPS, ROLES } from './admin/constants/roles';
 
 function App() {
   return (
@@ -41,135 +46,269 @@ function App() {
         <Route path="/admin/otp" element={<Otp />} />
         <Route path="/admin/unauthorized" element={<Unauthorized />} />
 
-        {/* Protected Routes */}
+        {/* Owner Routes */}
         <Route
-          path="/admin/dashboard"
+          path="/owner/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['super_admin', 'sub_admin']}>
-              <Layout>
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.ownerTeam}>
+              <OwnerLayout>
                 <Dashboard />
-              </Layout>
+              </OwnerLayout>
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/admin/vendors"
+          path="/owner/vendors"
           element={
-            <ProtectedRoute allowedRoles={['super_admin', 'sub_admin']}>
-              <Layout>
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.ownerTeam}>
+              <OwnerLayout>
                 <Vendors />
-              </Layout>
+              </OwnerLayout>
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/admin/vendor-onboarding"
+          path="/owner/vendor-onboarding"
           element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
-              <Layout>
+            <ProtectedRoute allowedRoles={[ROLES.OWNER]}>
+              <OwnerLayout>
                 <VendorOnboarding />
-              </Layout>
+              </OwnerLayout>
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/admin/kyc-verification"
+          path="/owner/kyc-verification"
           element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
-              <Layout>
+            <ProtectedRoute allowedRoles={[ROLES.OWNER]}>
+              <OwnerLayout>
                 <KycVerification />
-              </Layout>
+              </OwnerLayout>
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/admin/orders"
+          path="/owner/orders"
           element={
-            <ProtectedRoute allowedRoles={['super_admin', 'sub_admin']}>
-              <Layout>
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.ownerTeam}>
+              <OwnerLayout>
                 <AdminOrders />
-              </Layout>
+              </OwnerLayout>
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/admin/analytics"
+          path="/owner/analytics"
           element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
-              <Layout>
+            <ProtectedRoute allowedRoles={[ROLES.OWNER]}>
+              <OwnerLayout>
                 <Analytics />
-              </Layout>
+              </OwnerLayout>
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/admin/catalog"
+          path="/owner/catalog"
           element={
-            <ProtectedRoute allowedRoles={['super_admin', 'sub_admin']}>
-              <Layout>
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.ownerTeam}>
+              <OwnerLayout>
                 <Catalog />
-              </Layout>
+              </OwnerLayout>
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/admin/content-approval"
+          path="/owner/content-approval"
           element={
-            <ProtectedRoute allowedRoles={['super_admin', 'sub_admin']}>
-              <Layout>
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.ownerTeam}>
+              <OwnerLayout>
                 <ContentApproval />
-              </Layout>
+              </OwnerLayout>
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/admin/commission"
+          path="/owner/commission"
           element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
-              <Layout>
+            <ProtectedRoute allowedRoles={[ROLES.OWNER]}>
+              <OwnerLayout>
                 <Commission />
-              </Layout>
+              </OwnerLayout>
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/admin/subscription"
+          path="/owner/subscription"
           element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
-              <Layout>
+            <ProtectedRoute allowedRoles={[ROLES.OWNER]}>
+              <OwnerLayout>
                 <Subscription />
-              </Layout>
+              </OwnerLayout>
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/admin/sub-admins"
+          path="/owner/sub-admins"
           element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
-              <Layout>
+            <ProtectedRoute allowedRoles={[ROLES.OWNER]}>
+              <OwnerLayout>
                 <SubAdmins />
-              </Layout>
+              </OwnerLayout>
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/admin/settings"
+          path="/owner/settings"
           element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
-              <Layout>
+            <ProtectedRoute allowedRoles={[ROLES.OWNER]}>
+              <OwnerLayout>
                 <Settings />
-              </Layout>
+              </OwnerLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Platform Subadmin Routes */}
+        <Route
+          path="/subadmin/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PLATFORM_SUBADMIN]}>
+              <SubadminLayout>
+                <Dashboard />
+              </SubadminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/subadmin/orders"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PLATFORM_SUBADMIN]}>
+              <SubadminLayout>
+                <AdminOrders />
+              </SubadminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/subadmin/catalog"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PLATFORM_SUBADMIN]}>
+              <SubadminLayout>
+                <Catalog />
+              </SubadminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/subadmin/content-approval"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.PLATFORM_SUBADMIN]}>
+              <SubadminLayout>
+                <ContentApproval />
+              </SubadminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* University Admin Routes */}
+        <Route
+          path="/vendor/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.universityTeam} requireScope="vendor">
+              <UniversityLayout>
+                <Dashboard />
+              </UniversityLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vendor/orders"
+          element={
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.universityTeam} requireScope="vendor">
+              <UniversityLayout>
+                <AdminOrders />
+              </UniversityLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vendor/catalog"
+          element={
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.universityTeam} requireScope="vendor">
+              <UniversityLayout>
+                <Catalog />
+              </UniversityLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vendor/content"
+          element={
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.universityTeam} requireScope="vendor">
+              <UniversityLayout>
+                <ContentApproval />
+              </UniversityLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vendor/commission"
+          element={
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.universityTeam} requireScope="vendor">
+              <UniversityLayout>
+                <Commission />
+              </UniversityLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vendor/subadmins"
+          element={
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.universityTeam} requireScope="vendor">
+              <UniversityLayout>
+                <SubAdmins />
+              </UniversityLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vendor/analytics"
+          element={
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.universityTeam} requireScope="vendor">
+              <UniversityLayout>
+                <Analytics />
+              </UniversityLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vendor/settings"
+          element={
+            <ProtectedRoute allowedRoles={ROLE_GROUPS.universityTeam} requireScope="vendor">
+              <UniversityLayout>
+                <Settings />
+              </UniversityLayout>
             </ProtectedRoute>
           }
         />
@@ -181,8 +320,9 @@ function App() {
         <Route path="/register" element={<UserRegister />} />
 
         {/* Protected User Routes */}
+        <Route path="/" element={<Navigate to="/role-selection" replace />} />
         <Route
-          path="/"
+          path="/home"
           element={
             <UserLayout>
               <Home />
@@ -224,6 +364,16 @@ function App() {
           }
         />
         <Route
+          path="/my-ebooks"
+          element={
+            <UserProtectedRoute>
+              <UserLayout>
+                <MyEbooks />
+              </UserLayout>
+            </UserProtectedRoute>
+          }
+        />
+        <Route
           path="/profile"
           element={
             <UserProtectedRoute>
@@ -233,9 +383,18 @@ function App() {
             </UserProtectedRoute>
           }
         />
+        <Route
+          path="/reader/:bookId"
+          element={
+            <UserProtectedRoute>
+              <EbookReader />
+            </UserProtectedRoute>
+          }
+        />
 
         {/* Default redirects */}
-        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/admin/*" element={<Navigate to="/owner/dashboard" replace />} />
+        <Route path="/owner" element={<Navigate to="/owner/dashboard" replace />} />
       </Routes>
     </Router>
   );

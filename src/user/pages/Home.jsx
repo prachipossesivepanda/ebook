@@ -58,7 +58,7 @@ const Home = () => {
             Discover Your Next Great Read
           </h1>
           <p className="text-lg text-gray-600 mb-8">
-            Explore thousands of digital books from trusted vendors. Find your favorite genres, 
+            Explore thousands of digital books from trusted universities. Find your favorite genres, 
             discover new authors, and build your digital library.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
@@ -78,7 +78,7 @@ const Home = () => {
 
           {/* Admin/User Access Section */}
           <div className="mt-8 pt-8 border-t border-gray-200">
-            <p className="text-sm text-gray-600 mb-4">Admin or Vendor? Access your dashboard:</p>
+            <p className="text-sm text-gray-600 mb-4">Admin or University partner? Access your dashboard:</p>
             <div className="flex flex-wrap gap-3">
               <Link
                 to="/role-selection"
@@ -160,7 +160,10 @@ const Home = () => {
                   </div>
                   <span className="text-sm font-semibold text-gray-900">{book.price}</span>
                 </div>
-                <p className="text-xs text-gray-500">by {book.vendor}</p>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs font-medium text-blue-600">University:</span>
+                  <span className="text-xs font-semibold text-blue-700">{book.vendor}</span>
+                </div>
               </div>
             </Link>
           ))}
@@ -176,7 +179,7 @@ const Home = () => {
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-gray-900 mb-2">500+</div>
-            <div className="text-sm text-gray-600">Vendors</div>
+            <div className="text-sm text-gray-600">Universities</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-gray-900 mb-2">50,000+</div>

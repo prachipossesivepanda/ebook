@@ -1,29 +1,43 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useRoleContext } from '../hooks/useRoleContext';
 
 const SubAdmins = () => {
+  const { isOwnerTeam, isVendorTeam } = useRoleContext();
   const [showAddModal, setShowAddModal] = useState(false);
+  
+  const ownerPermissions = {
+    vendors: true,
+    orders: true,
+    catalog: true,
+    contentApproval: true,
+    analytics: false,
+    settings: false,
+    commission: false,
+    subscription: false,
+  };
+
+  const vendorPermissions = {
+    orders: true,
+    catalog: true,
+    content: true,
+    analytics: true,
+    team: false,
+    settings: false,
+  };
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    role: 'sub_admin',
-    permissions: {
-      vendors: true,
-      orders: true,
-      catalog: true,
-      contentApproval: true,
-      analytics: false,
-      settings: false,
-      commission: false,
-      subscription: false,
-    },
+    role: isVendorTeam ? 'vendor_subadmin' : 'platform_subadmin',
+    permissions: isVendorTeam ? { ...vendorPermissions } : { ...ownerPermissions },
   });
 
-  const subAdmins = [
+  const platformSubAdmins = [
     {
       id: 1,
       name: 'John Manager',
       email: 'john@ebook.com',
-      role: 'Sub Admin',
+      role: 'Platform Sub Admin',
       status: 'Active',
       lastLogin: '2024-01-22 10:30 AM',
       permissions: ['Vendors', 'Orders', 'Catalog', 'Content Approval'],
@@ -32,7 +46,7 @@ const SubAdmins = () => {
       id: 2,
       name: 'Sarah Assistant',
       email: 'sarah@ebook.com',
-      role: 'Sub Admin',
+      role: 'Platform Sub Admin',
       status: 'Active',
       lastLogin: '2024-01-22 09:15 AM',
       permissions: ['Vendors', 'Orders', 'Analytics'],
@@ -41,12 +55,35 @@ const SubAdmins = () => {
       id: 3,
       name: 'Mike Coordinator',
       email: 'mike@ebook.com',
-      role: 'Sub Admin',
+      role: 'Platform Sub Admin',
       status: 'Inactive',
       lastLogin: '2024-01-20 03:45 PM',
       permissions: ['Catalog', 'Content Approval'],
     },
   ];
+
+  const vendorTeamMembers = [
+    {
+      id: 1,
+      name: 'Emma Store Manager',
+      email: 'emma@bookstorepro.com',
+      role: 'Vendor Sub Admin',
+      status: 'Active',
+      lastLogin: '2024-01-22 11:00 AM',
+      permissions: ['Orders', 'Catalog', 'Content'],
+    },
+    {
+      id: 2,
+      name: 'David Fulfillment',
+      email: 'david@bookstorepro.com',
+      role: 'Vendor Sub Admin',
+      status: 'Active',
+      lastLogin: '2024-01-22 08:30 AM',
+      permissions: ['Orders', 'Catalog'],
+    },
+  ];
+
+  const subAdmins = isVendorTeam ? vendorTeamMembers : platformSubAdmins;
 
   const handlePermissionChange = (permission) => {
     setFormData({
@@ -61,22 +98,13 @@ const SubAdmins = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle form submission
-    alert('Sub-admin created successfully!');
+    alert(isVendorTeam ? 'Team member invited successfully!' : 'Sub-admin created successfully!');
     setShowAddModal(false);
     setFormData({
       name: '',
       email: '',
-      role: 'sub_admin',
-      permissions: {
-        vendors: true,
-        orders: true,
-        catalog: true,
-        contentApproval: true,
-        analytics: false,
-        settings: false,
-        commission: false,
-        subscription: false,
-      },
+      role: isVendorTeam ? 'vendor_subadmin' : 'platform_subadmin',
+      permissions: isVendorTeam ? { ...vendorPermissions } : { ...ownerPermissions },
     });
   };
 
@@ -84,16 +112,40 @@ const SubAdmins = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Sub-Admin Management</h2>
-          <p className="text-gray-600">Manage sub-admin accounts and permissions</p>
+          <h2 className="text-2xl font-bold text-gray-800">
+            {isVendorTeam ? 'Team Management' : 'Sub-Admin Management'}
+          </h2>
+          <p className="text-gray-600">
+            {isVendorTeam ? 'Manage your vendor team members and their access' : 'Manage platform sub-admin accounts and permissions'}
+          </p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
           className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium"
         >
-          Add Sub-Admin
+          {isVendorTeam ? 'Invite Team Member' : 'Add Sub-Admin'}
         </button>
       </div>
+
+      {/* Team Stats - Vendor View */}
+      {isVendorTeam && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Total Team Members</p>
+            <p className="text-2xl font-semibold text-gray-900 mt-1">{subAdmins.length}</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Active Members</p>
+            <p className="text-2xl font-semibold text-emerald-700 mt-1">
+              {subAdmins.filter(a => a.status === 'Active').length}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Pending Invitations</p>
+            <p className="text-2xl font-semibold text-amber-600 mt-1">0</p>
+          </div>
+        </div>
+      )}
 
       {/* Sub-Admins List */}
       <div className="grid grid-cols-1 gap-6">
@@ -147,7 +199,9 @@ const SubAdmins = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-800">Add New Sub-Admin</h3>
+              <h3 className="text-xl font-bold text-gray-800">
+                {isVendorTeam ? 'Invite Team Member' : 'Add New Sub-Admin'}
+              </h3>
               <button
                 onClick={() => setShowAddModal(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -210,7 +264,7 @@ const SubAdmins = () => {
                   type="submit"
                   className="flex-1 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium"
                 >
-                  Create Sub-Admin
+                  {isVendorTeam ? 'Send Invitation' : 'Create Sub-Admin'}
                 </button>
               </div>
             </form>

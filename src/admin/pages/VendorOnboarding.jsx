@@ -17,7 +17,7 @@ const VendorOnboarding = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle form submission
-    alert('Vendor onboarding request submitted!');
+    alert('University Onboarding request submitted!');
   };
 
   const handleInputChange = (e) => {
@@ -27,7 +27,7 @@ const VendorOnboarding = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-800">Vendor Onboarding</h2>
+        <h2 className="text-2xl font-bold text-gray-800">University Onboarding</h2>
         <p className="text-gray-600">Register new vendors to the platform</p>
       </div>
 

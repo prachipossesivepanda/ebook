@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useRoleContext } from '../hooks/useRoleContext';
 
 const ContentApproval = () => {
+  const { isOwnerTeam, isVendorTeam, vendorName } = useRoleContext();
   const [filterType, setFilterType] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('pending');
+  const [filterStatus, setFilterStatus] = useState(isVendorTeam ? 'all' : 'pending');
 
   const pendingContent = [
     {
@@ -47,7 +49,12 @@ const ContentApproval = () => {
     },
   ];
 
-  const filteredContent = pendingContent.filter(item => {
+  const scopedContent = useMemo(() => {
+    if (!isVendorTeam || !vendorName) return pendingContent;
+    return pendingContent.filter((item) => item.vendor === vendorName);
+  }, [isVendorTeam, vendorName]);
+
+  const filteredContent = scopedContent.filter(item => {
     const matchesType = filterType === 'all' || item.type.toLowerCase().includes(filterType.toLowerCase());
     const matchesStatus = filterStatus === 'all' || item.status.toLowerCase() === filterStatus.toLowerCase();
     return matchesType && matchesStatus;
@@ -66,8 +73,12 @@ const ContentApproval = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Content Approval</h2>
-          <p className="text-gray-600">Review and approve vendor content submissions</p>
+          <h2 className="text-2xl font-bold text-gray-800">
+            {isVendorTeam ? 'Content Submissions' : 'Content Approval'}
+          </h2>
+          <p className="text-gray-600">
+            {isVendorTeam ? 'Track your content submissions and approval status' : 'Review and approve vendor content submissions'}
+          </p>
         </div>
         <div className="flex gap-2">
           <select
@@ -92,6 +103,34 @@ const ContentApproval = () => {
         </div>
       </div>
 
+      {/* Submission Stats - Vendor View */}
+      {isVendorTeam && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Pending Review</p>
+            <p className="text-2xl font-semibold text-yellow-600 mt-1">
+              {scopedContent.filter(c => c.status === 'Pending').length}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Approved</p>
+            <p className="text-2xl font-semibold text-emerald-700 mt-1">
+              {scopedContent.filter(c => c.status === 'Approved').length}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Rejected</p>
+            <p className="text-2xl font-semibold text-red-600 mt-1">
+              {scopedContent.filter(c => c.status === 'Rejected').length}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <p className="text-sm text-gray-500">Total Submissions</p>
+            <p className="text-2xl font-semibold text-gray-900 mt-1">{scopedContent.length}</p>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-6">
         {filteredContent.map((item) => (
           <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -114,7 +153,9 @@ const ContentApproval = () => {
                       </span>
                     </div>
                     <h3 className="text-xl font-semibold text-gray-800 mb-1">{item.title}</h3>
-                    <p className="text-sm text-gray-600">Vendor: {item.vendor}</p>
+                    {!isVendorTeam && (
+                      <p className="text-sm text-gray-600">Vendor: {item.vendor}</p>
+                    )}
                     <p className="text-xs text-gray-500 mt-1">Submitted: {item.submittedDate}</p>
                   </div>
                 </div>
@@ -123,9 +164,9 @@ const ContentApproval = () => {
 
                 <div className="flex gap-3">
                   <button className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 text-sm font-medium">
-                    Review Details
+                    {isVendorTeam ? 'View Details' : 'Review Details'}
                   </button>
-                  {item.status === 'Pending' && (
+                  {!isVendorTeam && item.status === 'Pending' && (
                     <>
                       <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium">
                         Approve
@@ -134,6 +175,11 @@ const ContentApproval = () => {
                         Reject
                       </button>
                     </>
+                  )}
+                  {isVendorTeam && item.status === 'Pending' && (
+                    <span className="px-4 py-2 bg-yellow-50 text-yellow-700 rounded-lg text-sm font-medium border border-yellow-200">
+                      Awaiting Review
+                    </span>
                   )}
                 </div>
               </div>

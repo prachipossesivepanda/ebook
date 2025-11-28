@@ -11,7 +11,8 @@ const Cart = () => {
       price: 12.99,
       quantity: 1,
       image: '📚',
-      vendor: 'BookStore Pro'
+      vendor: 'BookStore Pro',
+      productType: 'ebook',
     },
     {
       id: 2,
@@ -21,7 +22,8 @@ const Cart = () => {
       price: 14.99,
       quantity: 2,
       image: '📖',
-      vendor: 'Literary Hub'
+      vendor: 'Literary Hub',
+      productType: 'physical',
     },
     {
       id: 3,
@@ -31,7 +33,8 @@ const Cart = () => {
       price: 11.99,
       quantity: 1,
       image: '📕',
-      vendor: 'ReadMore Books'
+      vendor: 'ReadMore Books',
+      productType: 'ebook',
     },
   ]);
 
@@ -88,7 +91,16 @@ const Cart = () => {
                           {item.title}
                         </Link>
                         <p className="text-sm text-gray-600 mt-1">{item.author}</p>
-                        <p className="text-xs text-gray-500 mt-1">by {item.vendor}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-xs text-gray-500">University: {item.vendor}</p>
+                          <span className={`text-xs px-2 py-0.5 rounded ${
+                            item.productType === 'ebook' 
+                              ? 'bg-blue-100 text-blue-700' 
+                              : 'bg-amber-100 text-amber-700'
+                          }`}>
+                            {item.productType === 'ebook' ? '📱 Ebook' : '📦 Physical'}
+                          </span>
+                        </div>
                       </div>
                       <button
                         onClick={() => removeItem(item.id)}
@@ -100,21 +112,25 @@ const Cart = () => {
                       </button>
                     </div>
                     <div className="flex items-center justify-between mt-4">
-                      <div className="flex items-center border border-gray-300 rounded-lg">
-                        <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="px-3 py-1 text-gray-600 hover:text-gray-900"
-                        >
-                          −
-                        </button>
-                        <span className="px-4 py-1 border-x border-gray-300 font-medium">{item.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="px-3 py-1 text-gray-600 hover:text-gray-900"
-                        >
-                          +
-                        </button>
-                      </div>
+                      {item.productType === 'physical' ? (
+                        <div className="flex items-center border border-gray-300 rounded-lg">
+                          <button
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            className="px-3 py-1 text-gray-600 hover:text-gray-900"
+                          >
+                            −
+                          </button>
+                          <span className="px-4 py-1 border-x border-gray-300 font-medium">{item.quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            className="px-3 py-1 text-gray-600 hover:text-gray-900"
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-500">Digital - Quantity: 1</span>
+                      )}
                       <div className="text-right">
                         <p className="text-lg font-semibold text-gray-900">
                           ${(item.price * item.quantity).toFixed(2)}
